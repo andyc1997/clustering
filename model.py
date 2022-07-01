@@ -3,7 +3,7 @@ from torch.utils.data import DataLoader, TensorDataset
 
 class MiniBatchKMeans:
     def __init__(self, k:int, batch_size:int, max_epoch:int=1000,
-                 tol:float=1e-4, radius:float=1, eps:float=1e-3,
+                 tol:float=1e-6, radius:float=1, eps:float=1e-3,
                  sparse:bool=False):
         assert k > 0 and batch_size > 0, f'Parameters should be positive, but got: {k} and {batch_size}\n'
         self.k = k
@@ -13,6 +13,7 @@ class MiniBatchKMeans:
         self.tol = tol
         self.radius = radius
         self.eps = eps
+        self.count = 0
         self.sparse = sparse
 
     def fit(self, X:torch.Tensor):
@@ -53,19 +54,21 @@ class MiniBatchKMeans:
                     for k in range(self.k):
                         center[k, :] = self.sparse_projection(center[k, :])
 
+                # check convergence
+                if torch.sum(torch.square(center - center_prev)) < self.tol:
+                    print(f'Convergence achieved. Iteration: {epoch}\n')
+                    self.center = center
+                    return
+
             # report iterations
             if epoch % 100 == 0:
                 print(f'Iteration: {epoch}')
-
-            # check convergence
-            if torch.max(torch.abs(center - center_prev)) < self.tol:
-                print(f'Convergence achieved. Iteration: {epoch}\n')
-                break
 
             # go next epoch
             center_prev = center.clone()
             epoch += 1
 
+        print(f'Maximum epoch reached: {epoch}')
         self.center = center
 
     def update_center(self, X:torch.Tensor):
@@ -101,7 +104,6 @@ class MiniBatchKMeans:
 
         c = torch.sign(c)*torch.clamp(torch.abs(c)-theta, 0)
         return c
-
 
 
 

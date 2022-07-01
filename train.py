@@ -25,7 +25,7 @@ X_tr = torch.Tensor(X_tr)
 
 
 #region train model
-model = MiniBatchKMeans(max_epoch=1000, k=3, batch_size=64, sparse=False)
+model = MiniBatchKMeans(max_epoch=500, k=3, batch_size=32, sparse=False)
 model.fit(X_tr)
 labels = model.update_center(X_tr)
 df_cluster = pd.DataFrame({'labels_pred': labels.numpy(), 'labels_true':labels_true})
