@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import torch
 
-from model import MiniBatchKMeans
+from model import MiniBatchKMeans, LloydKMeans, MacQueenKMeans, HartiganWongKMeans
 
 
 #region read iris data
@@ -25,10 +25,19 @@ X_tr = torch.Tensor(X_tr)
 
 
 #region train model
-model = MiniBatchKMeans(max_epoch=500, k=3, batch_size=32, sparse=False)
+# model = MiniBatchKMeans(max_epoch=500, k=3, batch_size=32, sparse=False)
+# model.fit(X_tr)
+# labels = model.update_center(X_tr)
+# df_cluster = pd.DataFrame({'labels_pred': labels.numpy(), 'labels_true':labels_true})
+# print(pd.crosstab(df_cluster['labels_pred'], df_cluster['labels_true']))
+
+model = LloydKMeans(k=3)
 model.fit(X_tr)
-labels = model.update_center(X_tr)
-df_cluster = pd.DataFrame({'labels_pred': labels.numpy(), 'labels_true':labels_true})
+df_cluster = pd.DataFrame({'labels_pred': model.label.numpy(), 'labels_true':labels_true})
 print(pd.crosstab(df_cluster['labels_pred'], df_cluster['labels_true']))
 
+model = HartiganWongKMeans(k=3, max_iter=30)
+model.fit(X_tr)
+df_cluster = pd.DataFrame({'labels_pred': model.label.numpy(), 'labels_true':labels_true})
+print(pd.crosstab(df_cluster['labels_pred'], df_cluster['labels_true']))
 #endregion
